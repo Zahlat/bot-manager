@@ -22,6 +22,7 @@ dev = [
     "respx>=0.23.1",
     "pytest-asyncio>=1.5.0",
     "hypothesis>=6.170.15",
+    "pydantic-settings>=2.16.3",
 ]
 
 [tool.uv]
@@ -67,7 +68,7 @@ known-first-party = ["tg_gateway", "tg_flow", "platform_kit", "curriculum_bot"]
 [tool.mypy]
 strict = true
 python_version = "3.12"
-files = ["packages/tg_gateway/src", "packages/tg_flow/src", "packages/platform_kit/src", "apps/curriculum_bot/src", "tests"]
+files = ["packages/tg_gateway/src", "packages/tg_gateway/examples", "packages/tg_flow/src", "packages/platform_kit/src", "apps/curriculum_bot/src", "tests"]
 # Map each src/ dir to its import name, so files are seen as "tg_gateway.client" (not
 # "packages.tg_gateway.src.tg_gateway.client") and tests importing them don't count them twice.
 mypy_path = ["packages/tg_gateway/src", "packages/tg_flow/src", "packages/platform_kit/src", "apps/curriculum_bot/src"]

@@ -26,6 +26,8 @@ jobs:
         run: make typecheck
       - name: Tests
         run: make test
+      - name: tg_gateway coverage gate (>= 95%)
+        run: make cov-gateway
       - name: Dependency audit
         run: make security
       - name: Secret scan

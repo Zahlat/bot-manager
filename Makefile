@@ -1,7 +1,7 @@
 # Single entry point for humans, CI and Claude. Keep recipes one-liners that also work on Windows.
 COMPOSE = docker compose -f docker-compose.dev.yml
 
-.PHONY: install lint format typecheck imports test test-all cov security up down logs ps check
+.PHONY: install lint format typecheck imports test test-all cov cov-gateway security up down logs ps check echo-bot
 
 install:            ## install all packages + dev tools, set up git hooks
 	uv sync --all-packages
@@ -24,6 +24,12 @@ imports:            ## dependency rule only
 
 test:               ## fast tests: unit + component + contract (+ flow, golden, panel)
 	uv run pytest -m "not integration and not chaos" --cov --cov-report=term-missing
+
+cov-gateway:        ## Phase 1 gate: tg_gateway coverage must stay >= 95%
+	uv run pytest -m "not integration and not chaos" --cov=tg_gateway --cov-fail-under=95 -q
+
+echo-bot:           ## run the tg_gateway echo bot in polling mode (BOT_TOKEN in .env)
+	uv run python packages/tg_gateway/examples/echo_bot.py
 
 test-all:           ## everything, needs Docker
 	uv run pytest --cov

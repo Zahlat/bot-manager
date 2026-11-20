@@ -14,6 +14,9 @@ students. Full plan: `docs/PLAN.md` (read only the section you need). Decisions:
 ## Layout (uv workspace)
 - `packages/platform_kit` — generic helpers. Imports no other workspace package.
 - `packages/tg_gateway` — typed async Bot API client. May import only `platform_kit`.
+  Modules: `client` `errors` `retry` `ratelimit` `callback` `keyboards` `dispatch/` `transport/`.
+  FastAPI only in `transport/webhook.py` (contract). Coverage gate: `make cov-gateway` (95%).
+  Smoke test: `make echo-bot` (dev BOT_TOKEN in `.env`).
 - `packages/tg_flow` — flow-as-data engine. May import `tg_gateway`, `platform_kit`.
 - `apps/curriculum_bot` — this bot: `domain/ application/ adapters/ presentation/ workers/ main.py`
 - `tests/` — markers: unit, component, contract, integration, flow, golden, panel, chaos
