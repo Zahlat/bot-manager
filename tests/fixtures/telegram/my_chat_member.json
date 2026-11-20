@@ -1,0 +1,17 @@
+{
+  "update_id": 870001003,
+  "my_chat_member": {
+    "chat": {"id": 5550001, "first_name": "سامي", "type": "private"},
+    "from": {"id": 5550001, "is_bot": false, "first_name": "سامي", "language_code": "ar"},
+    "date": 1763550020,
+    "old_chat_member": {
+      "user": {"id": 7770001, "is_bot": true, "first_name": "Curriculum Bot", "username": "curriculum_test_bot"},
+      "status": "member"
+    },
+    "new_chat_member": {
+      "user": {"id": 7770001, "is_bot": true, "first_name": "Curriculum Bot", "username": "curriculum_test_bot"},
+      "status": "kicked",
+      "until_date": 0
+    }
+  }
+}

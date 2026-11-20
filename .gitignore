@@ -1,0 +1,27 @@
+# secrets — never commit (docs/PLAN.md: Security §1)
+.env
+.env.*
+!.env.example
+deploy/secrets/
+
+# python / tooling
+__pycache__/
+*.py[cod]
+.venv/
+.mypy_cache/
+.ruff_cache/
+.pytest_cache/
+.coverage
+coverage.xml
+htmlcov/
+dist/
+.audit-reqs.txt
+
+# local claude settings (personal, not shared)
+.claude/settings.local.json
+
+# editors / OS
+.vscode/
+.idea/
+Thumbs.db
+.DS_Store

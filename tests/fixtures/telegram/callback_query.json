@@ -1,0 +1,17 @@
+{
+  "update_id": 870001002,
+  "callback_query": {
+    "id": "4382bfdwdsb323b2d9",
+    "from": {"id": 5550001, "is_bot": false, "first_name": "سامي", "language_code": "ar"},
+    "message": {
+      "message_id": 1366,
+      "from": {"id": 7770001, "is_bot": true, "first_name": "Curriculum Bot", "username": "curriculum_test_bot"},
+      "chat": {"id": 5550001, "first_name": "سامي", "type": "private"},
+      "date": 1763550010,
+      "text": "اختر الصف",
+      "reply_markup": {"inline_keyboard": [[{"text": "البكالوريا العلمي", "callback_data": "12:go:3:9f2a"}]]}
+    },
+    "chat_instance": "-8812345678901234567",
+    "data": "12:go:3:9f2a"
+  }
+}

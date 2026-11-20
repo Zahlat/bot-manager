@@ -1,0 +1,123 @@
+[project]
+name = "bot-manager"
+version = "0.1.0"
+description = "Workspace root: reusable Telegram packages + the Syrian curriculum PDF bot"
+requires-python = ">=3.12"
+dependencies = [
+    "tg-gateway",
+    "tg-flow",
+    "platform-kit",
+    "curriculum-bot",
+]
+
+[dependency-groups]
+dev = [
+    "ruff>=0.8",
+    "mypy>=1.13",
+    "pytest>=8.3",
+    "pytest-cov>=6.0",
+    "import-linter>=2.1",
+    "pre-commit>=4.0",
+    "pip-audit>=2.7",
+    "respx>=0.23.1",
+    "pytest-asyncio>=1.5.0",
+    "hypothesis>=6.170.15",
+]
+
+[tool.uv]
+package = false  # the root is only a workspace, not an installable package
+
+[tool.uv.workspace]
+members = ["packages/*", "apps/*"]
+
+[tool.uv.sources]
+tg-gateway = { workspace = true }
+tg-flow = { workspace = true }
+platform-kit = { workspace = true }
+curriculum-bot = { workspace = true }
+
+# ---------------------------------------------------------------- ruff
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+src = ["packages/*/src", "apps/*/src", "tests"]
+
+[tool.ruff.lint]
+select = [
+    "E", "W", "F",   # pycodestyle, pyflakes
+    "I",             # isort
+    "B",             # bugbear
+    "UP",            # pyupgrade
+    "S",             # bandit security rules
+    "ASYNC",         # no blocking I/O in async code (plan: Performance #6)
+    "SIM", "RUF", "PL", "PT", "TRY", "N",
+]
+ignore = ["TRY003", "PLR0913"]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**" = ["S101", "PLR2004"]  # asserts and magic numbers are fine in tests
+# Bot API error names are part of the documented gateway API (TelegramRetryAfter, ...); an
+# "Error" suffix on each would only add noise.
+"packages/tg_gateway/src/tg_gateway/errors.py" = ["N818"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["tg_gateway", "tg_flow", "platform_kit", "curriculum_bot"]
+
+# ---------------------------------------------------------------- mypy
+[tool.mypy]
+strict = true
+python_version = "3.12"
+files = ["packages/tg_gateway/src", "packages/tg_flow/src", "packages/platform_kit/src", "apps/curriculum_bot/src", "tests"]
+# Map each src/ dir to its import name, so files are seen as "tg_gateway.client" (not
+# "packages.tg_gateway.src.tg_gateway.client") and tests importing them don't count them twice.
+mypy_path = ["packages/tg_gateway/src", "packages/tg_flow/src", "packages/platform_kit/src", "apps/curriculum_bot/src"]
+explicit_package_bases = true
+warn_unreachable = true
+
+# ---------------------------------------------------------------- pytest
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-ra --strict-markers --import-mode=importlib"
+asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "function"
+markers = [
+    "unit: pure logic against fakes, no I/O",
+    "component: gateway/webhook behavior against a mocked Bot API",
+    "contract: our models accept recorded Telegram JSON",
+    "integration: real Postgres/Redis/MinIO via testcontainers",
+    "flow: flow validator / rules / renderer tests",
+    "golden: snapshot tests of the default flow",
+    "panel: admin panel component tests",
+    "chaos: resilience tests with toxiproxy",
+]
+
+[tool.coverage.run]
+branch = true
+source = ["tg_gateway", "tg_flow", "platform_kit", "curriculum_bot"]
+
+[tool.coverage.report]
+fail_under = 80
+show_missing = true
+skip_empty = true
+
+# ---------------------------------------------------------------- import-linter
+# Enforces the dependency rule from docs/PLAN.md: reusable packages never import the app,
+# and the domain never imports adapters/frameworks.
+[tool.importlinter]
+root_packages = ["tg_gateway", "tg_flow", "platform_kit", "curriculum_bot"]
+
+[[tool.importlinter.contracts]]
+name = "Package layers: app -> tg_flow -> tg_gateway -> platform_kit"
+type = "layers"
+layers = ["curriculum_bot", "tg_flow", "tg_gateway", "platform_kit"]
+
+[[tool.importlinter.contracts]]
+name = "Hexagonal: app layers point inward"
+type = "layers"
+layers = [
+    "curriculum_bot.main",
+    # siblings separated by "|" may not import each other; only main.py wires them together
+    "curriculum_bot.presentation | curriculum_bot.adapters | curriculum_bot.workers",
+    "curriculum_bot.application",
+    "curriculum_bot.domain",
+]
