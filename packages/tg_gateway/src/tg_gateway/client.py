@@ -27,6 +27,7 @@ from tg_gateway.errors import (
     TelegramRetryAfter,
     map_error,
 )
+from tg_gateway.ratelimit import SendLimiter
 from tg_gateway.retry import RetryPolicy
 from tg_gateway.types import (
     BotCommand,
@@ -130,6 +131,7 @@ class BotClient:
         sleep: Callable[[float], Awaitable[None]] = asyncio.sleep,
         rand: Callable[[], float] = random.random,  # jitter only, not security-sensitive
         on_retry_after: RetryAfterHook | None = None,
+        limiter: SendLimiter | None = None,
     ) -> None:
         self._token = token
         self._http = http
@@ -139,6 +141,7 @@ class BotClient:
         self._sleep = sleep
         self._rand = rand
         self._on_retry_after = on_retry_after
+        self._limiter = limiter
         _silence_url_logging()
 
     def __repr__(self) -> str:
@@ -167,7 +170,9 @@ class BotClient:
             disable_notification=disable_notification,
             link_preview_options={"is_disabled": not link_preview},
         )
-        return await self._call("sendMessage", payload, _MESSAGE, idempotent=False, chat_id=chat_id)
+        return await self._call(
+            "sendMessage", payload, _MESSAGE, idempotent=False, chat_id=chat_id, rate_limited=True
+        )
 
     async def edit_message_text(
         self,
@@ -187,7 +192,12 @@ class BotClient:
         )
         # Re-sending the same edit is harmless (Telegram answers "message is not modified").
         return await self._call(
-            "editMessageText", payload, _MESSAGE, idempotent=True, chat_id=chat_id
+            "editMessageText",
+            payload,
+            _MESSAGE,
+            idempotent=True,
+            chat_id=chat_id,
+            rate_limited=True,
         )
 
     async def send_document(
@@ -214,6 +224,7 @@ class BotClient:
             _MESSAGE,
             idempotent=False,
             chat_id=chat_id,
+            rate_limited=True,
             files={"document": upload} if upload else None,
             http_timeout=self._timeouts.for_upload() if upload else None,
         )
@@ -287,10 +298,13 @@ class BotClient:
         *,
         idempotent: bool,
         chat_id: int | str | None = None,
+        rate_limited: bool = False,
         files: Mapping[str, InputFile] | None = None,
         http_timeout: httpx.Timeout | None = None,
     ) -> T:
         for attempt in itertools.count(1):
+            if rate_limited and self._limiter is not None:
+                await self._limiter.acquire(chat_id)  # before every attempt, retries included
             response = await self._send(
                 method, payload, files, http_timeout or self._timeouts.default()
             )
@@ -348,6 +362,8 @@ class BotClient:
             )
 
     def _notify_retry_after(self, chat_id: int | str | None, seconds: float) -> None:
+        if self._limiter is not None:
+            self._limiter.penalize(chat_id, seconds)
         if self._on_retry_after is not None:
             self._on_retry_after(chat_id, seconds)
 
