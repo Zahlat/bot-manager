@@ -55,7 +55,7 @@ select = [
 ignore = ["TRY003", "PLR0913"]
 
 [tool.ruff.lint.per-file-ignores]
-"tests/**" = ["S101", "PLR2004"]  # asserts and magic numbers are fine in tests
+"tests/**" = ["S101", "PLR2004", "S105", "S106"]  # asserts, magic numbers, fake secrets
 # Bot API error names are part of the documented gateway API (TelegramRetryAfter, ...); an
 # "Error" suffix on each would only add noise.
 "packages/tg_gateway/src/**" = ["N818"]
@@ -105,6 +105,7 @@ skip_empty = true
 # and the domain never imports adapters/frameworks.
 [tool.importlinter]
 root_packages = ["tg_gateway", "tg_flow", "platform_kit", "curriculum_bot"]
+include_external_packages = true
 
 [[tool.importlinter.contracts]]
 name = "Package layers: app -> tg_flow -> tg_gateway -> platform_kit"
@@ -121,3 +122,10 @@ layers = [
     "curriculum_bot.application",
     "curriculum_bot.domain",
 ]
+
+[[tool.importlinter.contracts]]
+name = "tg_gateway: FastAPI/Starlette only in transport.webhook (client and dispatcher stay framework-free)"
+type = "forbidden"
+source_modules = ["tg_gateway"]
+forbidden_modules = ["fastapi", "starlette"]
+ignore_imports = ["tg_gateway.transport.webhook -> fastapi"]

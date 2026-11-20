@@ -12,7 +12,7 @@ from pydantic import SecretStr
 from tg_gateway.client import BotClient
 
 # Shaped like a real token on purpose, so the redaction tests catch leaks. Not a secret.
-TOKEN = "123456:TEST-TOKEN-abcdefghijklmnopqrstuvwxyz0123"  # noqa: S105
+TOKEN = "123456:TEST-TOKEN-abcdefghijklmnopqrstuvwxyz0123"
 BASE_URL = "https://tg.test"
 CHAT_ID = 42
 

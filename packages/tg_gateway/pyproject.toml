@@ -4,6 +4,7 @@ version = "0.1.0"
 description = "Thin typed async Telegram Bot API client, transports and dispatcher"
 requires-python = ">=3.12"
 dependencies = [
+    "fastapi>=0.165.0",
     "httpx>=0.28.1",
     "platform-kit",
     "pydantic>=2.14.4",
