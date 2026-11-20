@@ -58,7 +58,7 @@ ignore = ["TRY003", "PLR0913"]
 "tests/**" = ["S101", "PLR2004"]  # asserts and magic numbers are fine in tests
 # Bot API error names are part of the documented gateway API (TelegramRetryAfter, ...); an
 # "Error" suffix on each would only add noise.
-"packages/tg_gateway/src/tg_gateway/errors.py" = ["N818"]
+"packages/tg_gateway/src/**" = ["N818"]
 
 [tool.ruff.lint.isort]
 known-first-party = ["tg_gateway", "tg_flow", "platform_kit", "curriculum_bot"]
